@@ -67,6 +67,7 @@ border-radius:10px;
 background:#fafafa;
 animation:postFade 0.6s ease;
 transition:0.3s;
+position: relative; /* Added for timestamp positioning */
 }
 
 .post:hover{
@@ -107,6 +108,15 @@ background:#a71d2a;
 
 .counter{
 font-weight:bold;
+}
+
+/* Timestamp styling */
+.timestamp {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    font-size: 12px;
+    color: gray;
 }
 
 @keyframes fadeIn{
@@ -193,6 +203,9 @@ Delete
 </button>
 
 </div>
+
+<!-- Added timestamp -->
+<div class="timestamp">${post.created_at}</div>
 `
 
 postsDiv.appendChild(div)
