@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>GoBlog</title>
+
+<style>
+
+body{
+font-family: Arial, sans-serif;
+margin:0;
+background-image:url("https://images.unsplash.com/photo-1499750310107-5fef28a66643");
+background-size:cover;
+background-attachment:fixed;
+}
+
+.container{
+width:70%;
+margin:auto;
+background:white;
+padding:30px;
+margin-top:40px;
+border-radius:10px;
+box-shadow:0px 10px 30px rgba(0,0,0,0.3);
+animation:fadeIn 1s;
+}
+
+h1{
+text-align:center;
+}
+
+input, textarea{
+width:100%;
+padding:10px;
+margin-top:5px;
+border-radius:5px;
+border:1px solid #ccc;
+transition:0.3s;
+}
+
+input:focus, textarea:focus{
+border-color:#007BFF;
+box-shadow:0 0 5px #007BFF;
+outline:none;
+}
+
+button{
+margin-top:10px;
+padding:10px 20px;
+border:none;
+background:#007BFF;
+color:white;
+border-radius:5px;
+cursor:pointer;
+transition:0.3s;
+}
+
+button:hover{
+transform:scale(1.05);
+background:#0056b3;
+}
+
+.post{
+border:1px solid #ddd;
+padding:20px;
+margin-top:20px;
+border-radius:10px;
+background:#fafafa;
+animation:postFade 0.6s ease;
+transition:0.3s;
+}
+
+.post:hover{
+transform:translateY(-5px);
+box-shadow:0 5px 15px rgba(0,0,0,0.2);
+}
+
+.deleteBtn{
+background:red;
+}
+
+.deleteBtn:hover{
+background:darkred;
+}
+
+.reactions{
+margin-top:10px;
+display:flex;
+gap:10px;
+align-items:center;
+}
+
+.likeBtn{
+background:#28a745;
+}
+
+.dislikeBtn{
+background:#dc3545;
+}
+
+.likeBtn:hover{
+background:#1e7e34;
+}
+
+.dislikeBtn:hover{
+background:#a71d2a;
+}
+
+.counter{
+font-weight:bold;
+}
+
+@keyframes fadeIn{
+from{opacity:0; transform:translateY(-20px);}
+to{opacity:1; transform:translateY(0);}
+}
+
+@keyframes postFade{
+from{opacity:0; transform:translateY(20px);}
+to{opacity:1; transform:translateY(0);}
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>📝 GoBlog Application</h1>
+
+<h2>Create New Post</h2>
+
+<form id="postForm">
+
+<input type="text" id="title" placeholder="Enter Title" required>
+
+<br><br>
+
+<textarea id="content" placeholder="Enter Content" required></textarea>
+
+<br>
+
+<button type="submit">Create Post</button>
+
+</form>
+
+<hr>
+
+<h2>All Posts</h2>
+
+<div id="posts"></div>
+
+</div>
+
+<script>
+
+const form=document.getElementById("postForm")
+const postsDiv=document.getElementById("posts")
+
+// Load posts
+async function loadPosts(){
+
+const res=await fetch("/api/posts")
+const posts=await res.json()
+
+postsDiv.innerHTML=""
+
+posts.forEach(post=>{
+
+const div=document.createElement("div")
+div.classList.add("post")
+
+div.innerHTML=`
+<h3>${post.title}</h3>
+<p>${post.content}</p>
+
+<div class="reactions">
+
+<button class="likeBtn" onclick="likePost(${post.id})">
+👍 Like
+</button>
+
+<span class="counter">${post.likes || 0}</span>
+
+<button class="dislikeBtn" onclick="dislikePost(${post.id})">
+👎 Dislike
+</button>
+
+<span class="counter">${post.dislikes || 0}</span>
+
+<button class="deleteBtn" onclick="deletePost(${post.id})">
+Delete
+</button>
+
+</div>
+`
+
+postsDiv.appendChild(div)
+
+})
+
+}
+
+// Create post
+form.addEventListener("submit",async function(e){
+
+e.preventDefault()
+
+const title=document.getElementById("title").value
+const content=document.getElementById("content").value
+
+await fetch("/api/posts",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+title:title,
+content:content
+})
+
+})
+
+form.reset()
+
+loadPosts()
+
+})
+
+// Delete post
+async function deletePost(id){
+
+await fetch(`/api/posts/${id}`,{
+method:"DELETE"
+})
+
+loadPosts()
+
+}
+
+// Like post
+async function likePost(id){
+
+await fetch(`/api/posts/${id}/like`,{
+method:"POST"
+})
+
+loadPosts()
+
+}
+
+// Dislike post
+async function dislikePost(id){
+
+await fetch(`/api/posts/${id}/dislike`,{
+method:"POST"
+})
+
+loadPosts()
+
+}
+
+loadPosts()
+
+</script>
+
+</body>
+</html>
